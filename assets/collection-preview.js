@@ -15,6 +15,12 @@
       overlay.addEventListener('click',function(e){if(e.target===overlay||e.target.tagName==='BUTTON')overlay.remove()});
       document.body.appendChild(overlay);
     });
+    document.addEventListener('contextmenu',function(event){
+      if(event.target.closest('.cat, .cat img')) event.preventDefault();
+    });
+    document.addEventListener('dblclick',function(event){
+      if(event.target.closest('.cat, .cat img')) event.preventDefault();
+    },{passive:false});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 }());
