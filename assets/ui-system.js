@@ -17,11 +17,13 @@
   function installTouchKonamiPad(feedKey){
     var code=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
     var media=window.matchMedia('(max-width: 900px), (pointer: coarse)');
-    var timer=0,pointer=-1,startX=0,startY=0,consumed=false;
+    var timer=0,pointer=-1,startX=0,startY=0;
+    var listenerOptions={capture:true,passive:false};
+    function isActivationCorner(event){return media.matches&&event.clientX<=72&&event.clientY<=72}
+    function blockNativeGesture(event){if(event.cancelable)event.preventDefault();event.stopPropagation()}
     function cancel(){window.clearTimeout(timer);timer=0}
     function open(){
       if(!media.matches||document.querySelector('.touch-konami-pad'))return;
-      consumed=true;
       var progress=0,overlay=document.createElement('div');
       overlay.className='touch-konami-pad';
       overlay.innerHTML=`<section class="touch-konami-panel" role="dialog" aria-modal="true" aria-label="Secret code input"><button type="button" class="touch-konami-close" aria-label="Close">×</button><div class="touch-konami-title">SECRET INPUT</div><div class="touch-konami-progress" aria-hidden="true">${code.map(function(){return'<i></i>'}).join('')}</div><div class="touch-konami-controls"><div class="touch-konami-dpad"><button type="button" class="touch-konami-key touch-konami-up" data-konami-key="ArrowUp" aria-label="Up">↑</button><button type="button" class="touch-konami-key touch-konami-left" data-konami-key="ArrowLeft" aria-label="Left">←</button><button type="button" class="touch-konami-key touch-konami-down" data-konami-key="ArrowDown" aria-label="Down">↓</button><button type="button" class="touch-konami-key touch-konami-right" data-konami-key="ArrowRight" aria-label="Right">→</button></div><div class="touch-konami-ab"><button type="button" class="touch-konami-key" data-konami-key="b">B</button><button type="button" class="touch-konami-key" data-konami-key="a">A</button></div></div></section>`;
@@ -36,10 +38,11 @@
       });
       document.body.appendChild(overlay);
     }
-    document.addEventListener('pointerdown',function(event){if(!media.matches||event.clientX>72||event.clientY>72)return;pointer=event.pointerId;startX=event.clientX;startY=event.clientY;consumed=false;cancel();timer=window.setTimeout(open,1200)},true);
-    document.addEventListener('pointermove',function(event){if(event.pointerId===pointer&&Math.hypot(event.clientX-startX,event.clientY-startY)>14)cancel()},true);
-    ['pointerup','pointercancel'].forEach(function(type){document.addEventListener(type,function(event){if(event.pointerId!==pointer)return;cancel();pointer=-1;if(consumed){event.preventDefault();event.stopPropagation()}},true)});
-    document.addEventListener('contextmenu',function(event){if(media.matches&&event.clientX<=72&&event.clientY<=72)event.preventDefault()},true);
+    document.addEventListener('pointerdown',function(event){if(!isActivationCorner(event))return;blockNativeGesture(event);pointer=event.pointerId;startX=event.clientX;startY=event.clientY;cancel();timer=window.setTimeout(open,1200)},listenerOptions);
+    document.addEventListener('pointermove',function(event){if(event.pointerId!==pointer)return;blockNativeGesture(event);if(Math.hypot(event.clientX-startX,event.clientY-startY)>14)cancel()},listenerOptions);
+    ['pointerup','pointercancel'].forEach(function(type){document.addEventListener(type,function(event){if(event.pointerId!==pointer)return;blockNativeGesture(event);cancel();pointer=-1},listenerOptions)});
+    document.addEventListener('selectstart',function(event){if(pointer!==-1)blockNativeGesture(event)},listenerOptions);
+    document.addEventListener('contextmenu',function(event){if(isActivationCorner(event))blockNativeGesture(event)},listenerOptions);
   }
 
   function uiSound(){
