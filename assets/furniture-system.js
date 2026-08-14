@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
   'use strict';
   var modal,room;
   var furniture=Array.from({length:40},function(_,i){return 'furniture-'+String(i+1).padStart(2,'0')+'.png'});
@@ -68,7 +68,3 @@
   function bindWhistleAudio(){var button=room&&room.querySelector('.whistle-button');if(button&&!button.dataset.backgroundReady){button.dataset.backgroundReady='1';button.addEventListener('click',function(event){if(!room.classList.contains('decorate-mode'))return;event.preventDefault();event.stopImmediatePropagation();cycleBackground()},true)}if(button&&!button.dataset.audioReady){button.dataset.audioReady='1';button.addEventListener('click',playWhistle)}syncTopButton()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){install();setTimeout(function(){installWhistle();bindWhistleAudio()},300)});else{install();setTimeout(function(){installWhistle();bindWhistleAudio()},300)};
 }());
-
-
-
-
